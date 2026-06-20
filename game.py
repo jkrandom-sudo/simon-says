@@ -89,10 +89,18 @@ def play_round(settings):
                     snd.incorrect()
                 else:
                     used_hint = True
-                    _print(t(lang, "hint", hint=core.hint_text(sequence)))
+                    _print(t(lang, "hint", hint=core.hint_text(sequence, t(lang, "hint_first") + ":", t(lang, "hint_length") + ":")))
                     snd.correct()
                 continue
-            if core.answer_matches(sequence, answer):
+            parsed = core.parse_answer(answer)
+            if parsed is None:
+                _print(t(lang, "invalid"))
+                _print(t(lang, "incorrect", sequence=core.sequence_text(sequence)))
+                snd.lose()
+                rating_key = core.final_rating(completed, cfg["rounds"])
+                _print(t(lang, "finished", completed=completed, total=cfg["rounds"], rating=t(lang, rating_key), score=total_score))
+                return total_score
+            if parsed == list(sequence):
                 completed += 1
                 streak += 1
                 points = core.score_for(difficulty, round_index, streak, used_hint)

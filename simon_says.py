@@ -32,22 +32,32 @@ def normalize_token(token):
     return SHORTCUTS.get(token, token)
 
 
+def is_valid_color(token):
+    return token in COLORS
+
+
 def parse_answer(text):
-    return [normalize_token(part) for part in text.replace(",", " ").split()]
+    tokens = [normalize_token(part) for part in text.replace(",", " ").split()]
+    if not all(is_valid_color(t) for t in tokens):
+        return None
+    return tokens
 
 
 def answer_matches(sequence, answer_text):
-    return parse_answer(answer_text) == list(sequence)
+    parsed = parse_answer(answer_text)
+    if parsed is None:
+        return False
+    return parsed == list(sequence)
 
 
 def sequence_text(sequence):
     return " ".join(sequence)
 
 
-def hint_text(sequence):
+def hint_text(sequence, first_label="first:", length_label="length:"):
     if not sequence:
         return ""
-    return f"first: {sequence[0]}, length: {len(sequence)}"
+    return f"{first_label} {sequence[0]}, {length_label} {len(sequence)}"
 
 
 def score_for(difficulty, round_index, streak, used_hint=False):
